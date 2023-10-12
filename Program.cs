@@ -1,4 +1,5 @@
 using BookingOZCoreWebApp.Data;
+using BookingOZCoreWebApp.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 

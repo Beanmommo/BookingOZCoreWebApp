@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using BookingOZCoreWebApp.Models;
 
 namespace BookingOZCoreWebApp.Data
 {
@@ -9,5 +10,7 @@ namespace BookingOZCoreWebApp.Data
             : base(options)
         {
         }
+        public DbSet<BookingOZCoreWebApp.Models.Booking>? Booking { get; set; }
+        public DbSet<BookingOZCoreWebApp.Models.Location>? Location { get; set; }
     }
 }

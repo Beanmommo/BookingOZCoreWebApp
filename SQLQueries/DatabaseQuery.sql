@@ -1,6 +1,6 @@
 ﻿--Create Locations
 CREATE TABLE [dbo].[Locations] (
-	[Id] NVARCHAR (450) NOT NULL,
+	[Id]         INT IDENTITY (1,1) NOT NULL,
 	[Name] NVARCHAR (256) NOT NULL,
 	[Lat] FLOAT,
 	[Long] FLOAT,
@@ -18,7 +18,7 @@ CREATE TABLE [dbo].[StaffLocations] (
 
 --Create Bookings Table
 CREATE TABLE [dbo].[Bookings] (
-	[Id] NVARCHAR (450) NOT NULL,
+	[Id]         INT IDENTITY (1,1) NOT NULL,
 	[Date] datetime NOT NULL,
 	[CustomerId] NVARCHAR (450) NOT NULL,
 	[StaffId] NVARCHAR (450) NOT NULL,
