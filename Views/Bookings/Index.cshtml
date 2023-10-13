@@ -41,10 +41,10 @@
                 @Html.DisplayFor(modelItem => item.Date)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.PatientId)
+                @Html.DisplayFor(modelItem => item.Patient.UserName)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.StaffId)
+                @Html.DisplayFor(modelItem => item.Staff.UserName)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Location.Name)

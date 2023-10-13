@@ -11,6 +11,10 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.AspNetCore.Identity;
+using SendGrid;
+using SendGrid.Helpers.Mail;
+using System;
+using System.Text;
 
 namespace BookingOZCoreWebApp.Controllers
 {
@@ -29,7 +33,9 @@ namespace BookingOZCoreWebApp.Controllers
         // GET: Bookings
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Booking.Include(b => b.Location);
+            var applicationDbContext = _context.Booking.Include(b => b.Location)
+                .Include(b => b.Staff)
+                .Include(b => b.Patient);
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -75,9 +81,11 @@ namespace BookingOZCoreWebApp.Controllers
             booking.Patient = await _context.Users.FirstOrDefaultAsync(m => m.Id == booking.PatientId);
             ModelState.Clear();
             TryValidateModel(booking);
+
             if (ModelState.IsValid)
             {
                 _context.Add(booking);
+                await SendCreationBookingEmail(booking);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -188,6 +196,50 @@ namespace BookingOZCoreWebApp.Controllers
         private bool BookingExists(int id)
         {
           return (_context.Booking?.Any(e => e.Id == id)).GetValueOrDefault();
+        }
+
+        private static async Task SendCreationBookingEmail(Booking booking)
+        {
+            var apikey = "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";
+            var client = new SendGridClient(apikey);
+            var adminEmail = new EmailAddress("leonardo.prasetyo5@gmail.com", "Booking OZ");
+            var patientEmail = new EmailAddress("lpra0002@student.monash.edu", booking.Patient.UserName);
+            var staffEmail = new EmailAddress("lpra0002@student.monash.edu", booking.Staff.UserName);
+
+            //Email content
+            
+            
+            var sb = new StringBuilder();
+            sb.Append("<html><head><meta charset='utf-8'/>");
+            sb.Append("<style>ul li{list-style:none;margin-top:3px;margin-bottom:3px;}");
+            sb.Append("h1{font-size: 23px;margin-bottom: 0px;margin-top: 0px;");
+            sb.Append("font-weight: normal;font-family: Arial;}");
+            sb.Append("h2{margin: 3px;margin-left: 0px;font-size: 16px;}");
+            sb.Append("h3{margin: 3px;font-size: 16px;}");
+            sb.Append("h4{margin: 3px;margin-left: 0px;font-size: 13px;}");
+            sb.Append("h5{margin: 3px;font-size: 11px;font-weight: normal;font-family: Arial;}");
+            sb.Append("</style>");
+            sb.Append("</head>");
+            sb.Append("<body style='margin:auto;margin-top:0px;margin-bottom:5px;'>");
+            sb.Append("<div>");
+            sb.Append("<h2>Booking Details<h2>");
+            sb.Append($"<h4>Booking Date:   {booking.Date.ToString()}</h4>");
+            sb.Append($"<h4>Location Name:  {booking.Location.Name}</h4>");
+            sb.Append($"<h4>Service Name:   {booking.ServiceName}</h4>");
+            sb.Append($"<h4>Patient Name:   {booking.Patient.UserName}</h4>");
+            sb.Append($"<h4>Assigned Staff: {booking.Staff.UserName}</h4>");
+            sb.Append("</div>");
+            sb.Append("</body>");
+            sb.Append("</html>");
+            var Htmlcontent = sb.ToString();
+            var subjectPatient = $"{booking.Patient.UserName}: Booking Created";
+            var subjectStaff = $"{booking.Staff.UserName}: Upcoming Booking Created";
+            var patientMsg = MailHelper.CreateSingleEmail(adminEmail, patientEmail, subjectPatient, null, Htmlcontent);
+            var staffMsg = MailHelper.CreateSingleEmail(adminEmail, staffEmail, subjectStaff, null ,Htmlcontent);
+            var patientResponse = await client.SendEmailAsync(patientMsg);
+            var staffResponse = await client.SendEmailAsync(staffMsg);
+
+            
         }
     }
 }
