@@ -12,5 +12,6 @@ namespace BookingOZCoreWebApp.Data
         }
         public DbSet<BookingOZCoreWebApp.Models.Booking>? Booking { get; set; }
         public DbSet<BookingOZCoreWebApp.Models.Location>? Location { get; set; }
+        public DbSet<BookingOZCoreWebApp.Models.Report>? Report { get; set; }
     }
 }

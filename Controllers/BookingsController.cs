@@ -202,13 +202,28 @@ namespace BookingOZCoreWebApp.Controllers
         {
             var apikey = "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";
             var client = new SendGridClient(apikey);
+
+            //Setup email
             var adminEmail = new EmailAddress("leonardo.prasetyo5@gmail.com", "Booking OZ");
             var patientEmail = new EmailAddress("lpra0002@student.monash.edu", booking.Patient.UserName);
             var staffEmail = new EmailAddress("lpra0002@student.monash.edu", booking.Staff.UserName);
 
             //Email content
+            var Htmlcontent = GenerateBookingDetailsHtml(booking);
+            var subjectPatient = $"{booking.Patient.UserName}: Booking Created";
+            var subjectStaff = $"{booking.Staff.UserName}: Upcoming Booking Created";
+
+            //Send email
+            var patientMsg = MailHelper.CreateSingleEmail(adminEmail, patientEmail, subjectPatient, null, Htmlcontent);
+            var staffMsg = MailHelper.CreateSingleEmail(adminEmail, staffEmail, subjectStaff, null ,Htmlcontent);
+            var patientResponse = await client.SendEmailAsync(patientMsg);
+            var staffResponse = await client.SendEmailAsync(staffMsg);
             
-            
+        }
+
+        private static string GenerateBookingDetailsHtml(Booking booking)
+        {
+            //Email content
             var sb = new StringBuilder();
             sb.Append("<html><head><meta charset='utf-8'/>");
             sb.Append("<style>ul li{list-style:none;margin-top:3px;margin-bottom:3px;}");
@@ -231,15 +246,7 @@ namespace BookingOZCoreWebApp.Controllers
             sb.Append("</div>");
             sb.Append("</body>");
             sb.Append("</html>");
-            var Htmlcontent = sb.ToString();
-            var subjectPatient = $"{booking.Patient.UserName}: Booking Created";
-            var subjectStaff = $"{booking.Staff.UserName}: Upcoming Booking Created";
-            var patientMsg = MailHelper.CreateSingleEmail(adminEmail, patientEmail, subjectPatient, null, Htmlcontent);
-            var staffMsg = MailHelper.CreateSingleEmail(adminEmail, staffEmail, subjectStaff, null ,Htmlcontent);
-            var patientResponse = await client.SendEmailAsync(patientMsg);
-            var staffResponse = await client.SendEmailAsync(staffMsg);
-
-            
+            return sb.ToString();
         }
     }
 }

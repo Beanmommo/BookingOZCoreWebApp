@@ -29,6 +29,13 @@
                 @Html.DisplayNameFor(model => model.Location)
             </th>
             <th></th>
+            @if (User.IsInRole("Staff"))
+            {
+                <th>
+                    --
+                </th>
+            }
+            
         </tr>
     </thead>
     <tbody>
@@ -54,6 +61,14 @@
                 <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
                 <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
             </td>
+            
+                @if (User.IsInRole("Staff"))
+                {
+                    <td>
+                        <a asp-area="" asp-controller="Reports" asp-action="Index">Finalise Booking</a>
+                    </td>
+                }
+            
         </tr>
 }
     </tbody>
