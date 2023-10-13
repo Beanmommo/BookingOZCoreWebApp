@@ -10,6 +10,7 @@ using BookingOZCoreWebApp.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.AspNetCore.Identity;
 
 namespace BookingOZCoreWebApp.Controllers
 {
@@ -17,10 +18,12 @@ namespace BookingOZCoreWebApp.Controllers
     public class BookingsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public BookingsController(ApplicationDbContext context)
+        public BookingsController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Bookings
@@ -53,6 +56,8 @@ namespace BookingOZCoreWebApp.Controllers
         public IActionResult Create()
         {
             ViewData["LocationId"] = new SelectList(_context.Set<Location>(), "Id", "Name");
+            var StaffList = _userManager.GetUsersInRoleAsync("Staff").Result;
+            ViewData["StaffId"] = new SelectList(StaffList, "Id", "UserName");
             return View();
         }
 
@@ -65,6 +70,9 @@ namespace BookingOZCoreWebApp.Controllers
         {   
             booking.PatientId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             booking.ServiceName = "X-Ray";
+            booking.Location = await _context.Location.FirstOrDefaultAsync(m => m.Id == booking.LocationId);
+            booking.Staff = await _context.Users.FirstOrDefaultAsync(m => m.Id == booking.StaffId);
+            booking.Patient = await _context.Users.FirstOrDefaultAsync(m => m.Id == booking.PatientId);
             ModelState.Clear();
             TryValidateModel(booking);
             if (ModelState.IsValid)
@@ -73,7 +81,16 @@ namespace BookingOZCoreWebApp.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+            else
+            {
+                var message = string.Join(" | ", ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage));
+                Console.Error.WriteLine(message);
+                Console.WriteLine("MODEL NOT VALID LMAO");
+            }
             ViewData["LocationId"] = new SelectList(_context.Set<Location>(), "Id", "Name", booking.LocationId);
+            ViewData["StaffId"] = new SelectList(_context.Users, "Id", "UserName", booking.StaffId);
             return View(booking);
         }
 

@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using BookingOZCoreWebApp.Data;
 using BookingOZCoreWebApp.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace BookingOZCoreWebApp.Controllers
 {
@@ -60,7 +61,9 @@ namespace BookingOZCoreWebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name,Address,Lat,Long")] Location location)
         {
-
+            ModelState.Clear();
+            TryValidateModel(location);
+            
             if (ModelState.IsValid)
             {
                 _context.Add(location);
@@ -69,12 +72,10 @@ namespace BookingOZCoreWebApp.Controllers
             }
             else
             {
-                Console.WriteLine("Model is invalid");
-                Console.WriteLine(location.Id);
-                Console.WriteLine(location.Name);
-                Console.WriteLine(location.Address);
-                Console.WriteLine(location.Long);
-                Console.WriteLine(location.Lat);
+                var message = string.Join(" | ", ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage));
+                Console.Error.WriteLine(message);
             }
             return View(location);
         }
