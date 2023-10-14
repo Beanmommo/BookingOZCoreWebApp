@@ -8,6 +8,10 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BookingOZCoreWebApp.Data;
 using BookingOZCoreWebApp.Models;
+using SendGrid.Helpers.Mail;
+using SendGrid;
+using System.Text;
+using System.Net.Mail;
 
 namespace BookingOZCoreWebApp.Controllers
 {
@@ -98,8 +102,9 @@ namespace BookingOZCoreWebApp.Controllers
                 {
                     await ReportFile.CopyToAsync(stream);
                 }
-                Console.WriteLine(completePath);
-
+                //Send email
+                await SendBookingReportEmail(report.Booking, report, completePath);
+                //Write to database
                 _context.Add(report);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -214,6 +219,64 @@ namespace BookingOZCoreWebApp.Controllers
         private bool ReportExists(int id)
         {
           return (_context.Report?.Any(e => e.Id == id)).GetValueOrDefault();
+        }
+
+        private static async Task SendBookingReportEmail(Booking booking, Report report, string reportFilePath)
+        {
+            var apikey = "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";
+            var client = new SendGridClient(apikey);
+
+            //Setup email
+            var adminEmail = new EmailAddress("leonardo.prasetyo5@gmail.com", "Booking OZ");
+            var patientEmail = new EmailAddress("lpra0002@student.monash.edu", booking.Patient.UserName);
+            var staffEmail = new EmailAddress("lpra0002@student.monash.edu", booking.Staff.UserName);
+
+            //Email content
+            var Htmlcontent = GenerateBookingDetailsHtml(booking);
+            var subjectPatient = $"{booking.Patient.UserName}: Booking Created";
+            var subjectStaff = $"{booking.Staff.UserName}: Upcoming Booking Created";
+
+            //Send email
+            var patientMsg = MailHelper.CreateSingleEmail(adminEmail, patientEmail, subjectPatient, null, Htmlcontent);
+            var staffMsg = MailHelper.CreateSingleEmail(adminEmail, staffEmail, subjectStaff, null, Htmlcontent);
+
+            //Add email attatchment
+            byte[] reportContent = System.IO.File.ReadAllBytes(reportFilePath);
+            
+            patientMsg.AddAttachment(report.Path, Convert.ToBase64String(reportContent));
+            staffMsg.AddAttachment(report.Path, Convert.ToBase64String(reportContent));
+            var patientResponse = await client.SendEmailAsync(patientMsg);
+            var staffResponse = await client.SendEmailAsync(staffMsg);
+            Console.WriteLine(patientResponse.StatusCode);
+
+        }
+
+        private static string GenerateBookingDetailsHtml(Booking booking)
+        {
+            //Email content
+            var sb = new StringBuilder();
+            sb.Append("<html><head><meta charset='utf-8'/>");
+            sb.Append("<style>ul li{list-style:none;margin-top:3px;margin-bottom:3px;}");
+            sb.Append("h1{font-size: 23px;margin-bottom: 0px;margin-top: 0px;");
+            sb.Append("font-weight: normal;font-family: Arial;}");
+            sb.Append("h2{margin: 3px;margin-left: 0px;font-size: 16px;}");
+            sb.Append("h3{margin: 3px;font-size: 16px;}");
+            sb.Append("h4{margin: 3px;margin-left: 0px;font-size: 13px;}");
+            sb.Append("h5{margin: 3px;font-size: 11px;font-weight: normal;font-family: Arial;}");
+            sb.Append("</style>");
+            sb.Append("</head>");
+            sb.Append("<body style='margin:auto;margin-top:0px;margin-bottom:5px;'>");
+            sb.Append("<div>");
+            sb.Append("<h2>Booking Details<h2>");
+            sb.Append($"<h4>Booking Date:   {booking.Date.ToString()}</h4>");
+            sb.Append($"<h4>Location Name:  {booking.Location.Name}</h4>");
+            sb.Append($"<h4>Service Name:   {booking.ServiceName}</h4>");
+            sb.Append($"<h4>Patient Name:   {booking.Patient.UserName}</h4>");
+            sb.Append($"<h4>Assigned Staff: {booking.Staff.UserName}</h4>");
+            sb.Append("</div>");
+            sb.Append("</body>");
+            sb.Append("</html>");
+            return sb.ToString();
         }
     }
 }
