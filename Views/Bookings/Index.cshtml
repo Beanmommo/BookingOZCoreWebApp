@@ -65,7 +65,7 @@
                 @if (User.IsInRole("Staff"))
                 {
                     <td>
-                        <a asp-area="" asp-controller="Reports" asp-action="Index">Finalise Booking</a>
+                        <a asp-controller="Reports" asp-action="Create" asp-route-bookingid="@item.Id">Finalise Booking</a>
                     </td>
                 }
             

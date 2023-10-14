@@ -25,7 +25,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="BookingId" class="control-label"></label>
-                <select asp-for="BookingId" class ="form-control" asp-items="ViewBag.BookingId"></select>
+                <input asp-for="BookingId" class="form-control" value=@ViewBag.BookingId disabled/>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />

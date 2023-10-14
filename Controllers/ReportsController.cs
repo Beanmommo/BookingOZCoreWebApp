@@ -46,10 +46,23 @@ namespace BookingOZCoreWebApp.Controllers
         }
 
         // GET: Reports/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create(int? bookingId)
         {
-            ViewData["BookingId"] = new SelectList(_context.Booking, "Id", "Id");
-            return View();
+            if (bookingId == null || _context.Report == null)
+            {
+                return NotFound();
+            }
+            var booking = await _context.Booking.FindAsync(bookingId);
+            if (booking == null)
+            {
+                return NotFound();
+            }
+            var report = new Report();
+            report.Booking = booking;
+            report.BookingId = (int)bookingId;
+            ViewData["BookingId"] = bookingId;
+            //ViewData["BookingId"] = new SelectList(_context.Booking, "Id", "Id");
+            return View(report);
         }
 
         // POST: Reports/Create
@@ -57,15 +70,16 @@ namespace BookingOZCoreWebApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Path,Description,BookingId")] Report report)
+        public async Task<IActionResult> Create(int bookingId, [Bind("Id,Path,Description,BookingId")] Report report)
         {
+            
             if (ModelState.IsValid)
             {
                 _context.Add(report);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["BookingId"] = new SelectList(_context.Booking, "Id", "Id", report.BookingId);
+            ViewData["BookingId"] = bookingId;
             return View(report);
         }
 
