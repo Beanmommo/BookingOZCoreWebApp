@@ -95,7 +95,7 @@ namespace BookingOZCoreWebApp.Controllers
                 .SelectMany(v => v.Errors)
                 .Select(e => e.ErrorMessage));
                 Console.Error.WriteLine(message);
-                Console.WriteLine("MODEL NOT VALID LMAO");
+                Console.WriteLine("MODEL NOT VALID LIAO");
             }
             ViewData["LocationId"] = new SelectList(_context.Set<Location>(), "Id", "Name", booking.LocationId);
             ViewData["StaffId"] = new SelectList(_context.Users, "Id", "UserName", booking.StaffId);

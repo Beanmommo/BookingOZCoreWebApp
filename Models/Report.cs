@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BookingOZCoreWebApp.Models
 {
@@ -10,5 +11,7 @@ namespace BookingOZCoreWebApp.Models
         public string Description { get; set; }
         public int BookingId { get; set; }
         public Booking Booking { get; set; }
+        [NotMapped]
+        public string? ReportFile { get; set; }
     }
 }

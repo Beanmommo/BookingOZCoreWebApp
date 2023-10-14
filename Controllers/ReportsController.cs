@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -13,10 +14,12 @@ namespace BookingOZCoreWebApp.Controllers
     public class ReportsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public ReportsController(ApplicationDbContext context)
+        public ReportsController(ApplicationDbContext context, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         // GET: Reports
@@ -46,22 +49,17 @@ namespace BookingOZCoreWebApp.Controllers
         }
 
         // GET: Reports/Create
-        public async Task<IActionResult> Create(int? bookingId)
+        public IActionResult Create(int bookingId)
         {
-            if (bookingId == null || _context.Report == null)
+            if (_context.Report == null)
             {
                 return NotFound();
             }
-            var booking = await _context.Booking.FindAsync(bookingId);
-            if (booking == null)
-            {
-                return NotFound();
-            }
-            var report = new Report();
-            report.Booking = booking;
-            report.BookingId = (int)bookingId;
-            ViewData["BookingId"] = bookingId;
+            ViewBag.BookingId = bookingId;
             //ViewData["BookingId"] = new SelectList(_context.Booking, "Id", "Id");
+            var report = new Report();
+            report.BookingId = bookingId;
+            Console.WriteLine(report.BookingId);
             return View(report);
         }
 
@@ -70,16 +68,55 @@ namespace BookingOZCoreWebApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(int bookingId, [Bind("Id,Path,Description,BookingId")] Report report)
+        public async Task<IActionResult> Create([Bind("Id,ReportFile,Description,BookingId")] Report report, IFormFile ReportFile)
         {
-            
+            ModelState.Clear();
+            var myUniqueFileName = string.Format(@"{0}", Guid.NewGuid());
+            report.Path = myUniqueFileName;
+            Console.WriteLine(report.BookingId.ToString());
+            var booking = await _context.Booking.FirstOrDefaultAsync(m => m.Id == report.BookingId);
+            booking.Location = await _context.Location.FirstOrDefaultAsync(m => m.Id == booking.LocationId);
+            booking.Staff = await _context.Users.FirstOrDefaultAsync(m => m.Id == booking.StaffId);
+            booking.Patient = await _context.Users.FirstOrDefaultAsync(m => m.Id == booking.PatientId);
+            report.Booking = booking;
+
+
+            TryValidateModel(report);
+
             if (ModelState.IsValid)
             {
+               // var path = Path.Combine(Directory.GetCurrentDirectory(), "Uploads", myUniqueFileName);
+                
+                string serverPath = _webHostEnvironment.ContentRootPath;
+                string uploadPath = Path.Combine(serverPath, "Uploads/");
+                string fileExtenstion = Path.GetExtension(ReportFile.FileName);
+                string filePath = report.Path + fileExtenstion;
+                report.Path = filePath;
+                string completePath = uploadPath + report.Path;
+                using (System.IO.Stream stream = new FileStream(completePath, FileMode.Create))
+                
+                {
+                    await ReportFile.CopyToAsync(stream);
+                }
+                Console.WriteLine(completePath);
+
                 _context.Add(report);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["BookingId"] = bookingId;
+            else
+            {
+                var message = string.Join(" | ", ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage));
+                Console.Error.WriteLine(message);
+                Console.WriteLine("MODEL NOT VALID LIAO");
+            }
+            
+            
+            ViewData["BookingId"] = report.BookingId;
+
+            //return RedirectToAction(nameof(Create), new {bookingId =  report.BookingId});
             return View(report);
         }
 
