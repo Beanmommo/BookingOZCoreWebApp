@@ -223,7 +223,7 @@ namespace BookingOZCoreWebApp.Controllers
 
         private static async Task SendBookingReportEmail(Booking booking, Report report, string reportFilePath)
         {
-            var apikey = "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";
+            var apikey = Environment.GetEnvironmentVariable("BookingOzSendGrid");
             var client = new SendGridClient(apikey);
 
             //Setup email
@@ -232,9 +232,9 @@ namespace BookingOZCoreWebApp.Controllers
             var staffEmail = new EmailAddress("lpra0002@student.monash.edu", booking.Staff.UserName);
 
             //Email content
-            var Htmlcontent = GenerateBookingDetailsHtml(booking);
-            var subjectPatient = $"{booking.Patient.UserName}: Booking Created";
-            var subjectStaff = $"{booking.Staff.UserName}: Upcoming Booking Created";
+            var Htmlcontent = GenerateBookingDetailsHtml(booking, report);
+            var subjectPatient = $"{booking.Patient.UserName}: Medical Imaging Report";
+            var subjectStaff = $"{booking.Staff.UserName}: Medical Imaging Report Uploaded";
 
             //Send email
             var patientMsg = MailHelper.CreateSingleEmail(adminEmail, patientEmail, subjectPatient, null, Htmlcontent);
@@ -251,7 +251,7 @@ namespace BookingOZCoreWebApp.Controllers
 
         }
 
-        private static string GenerateBookingDetailsHtml(Booking booking)
+        private static string GenerateBookingDetailsHtml(Booking booking, Report report)
         {
             //Email content
             var sb = new StringBuilder();
@@ -273,6 +273,8 @@ namespace BookingOZCoreWebApp.Controllers
             sb.Append($"<h4>Service Name:   {booking.ServiceName}</h4>");
             sb.Append($"<h4>Patient Name:   {booking.Patient.UserName}</h4>");
             sb.Append($"<h4>Assigned Staff: {booking.Staff.UserName}</h4>");
+            sb.Append("<h2>Staff Comments<h2>");
+            sb.Append($"<h4>{report.Description}</h4>");
             sb.Append("</div>");
             sb.Append("</body>");
             sb.Append("</html>");

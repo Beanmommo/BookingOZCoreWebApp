@@ -2,6 +2,7 @@ using BookingOZCoreWebApp.Data;
 using BookingOZCoreWebApp.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,12 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddDefaultUI()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+builder.Services.AddAuthentication().AddGoogle(options =>
+{
+    IConfigurationSection googleAuthNSection = builder.Configuration.GetSection("Authentication:Google");
+    options.ClientId = googleAuthNSection["ClientId"];
+    options.ClientSecret = googleAuthNSection["ClientSecret"];
+});
 
 var app = builder.Build();
 
@@ -45,3 +52,4 @@ app.MapControllerRoute(
 app.MapRazorPages();
 
 app.Run();
+
