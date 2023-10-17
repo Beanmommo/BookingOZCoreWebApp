@@ -84,7 +84,10 @@ namespace BookingOZCoreWebApp.Controllers
             booking.Patient = await _context.Users.FirstOrDefaultAsync(m => m.Id == booking.PatientId);
             report.Booking = booking;
 
+            //Finalised booking
+            booking.IsFinalised = true;
 
+            TryValidateModel(booking);
             TryValidateModel(report);
 
             if (ModelState.IsValid)
@@ -106,6 +109,7 @@ namespace BookingOZCoreWebApp.Controllers
                 await SendBookingReportEmail(report.Booking, report, completePath);
                 //Write to database
                 _context.Add(report);
+                _context.Update(booking);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -117,7 +121,6 @@ namespace BookingOZCoreWebApp.Controllers
                 Console.Error.WriteLine(message);
                 Console.WriteLine("MODEL NOT VALID LIAO");
             }
-            
             
             ViewData["BookingId"] = report.BookingId;
 
@@ -250,6 +253,7 @@ namespace BookingOZCoreWebApp.Controllers
             Console.WriteLine(patientResponse.StatusCode);
 
         }
+
 
         private static string GenerateBookingDetailsHtml(Booking booking, Report report)
         {

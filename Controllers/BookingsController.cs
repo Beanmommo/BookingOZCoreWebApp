@@ -33,7 +33,13 @@ namespace BookingOZCoreWebApp.Controllers
         // GET: Bookings
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Booking.Include(b => b.Location)
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var booking = _context.Booking.Where(b => (b.PatientId == userId | b.StaffId == userId) & !b.IsFinalised);
+            if (User.IsInRole("Admin"))
+            {
+                booking = _context.Booking.Where(b => !b.IsFinalised);
+            }
+            var applicationDbContext = booking.Include(b => b.Location)
                 .Include(b => b.Staff)
                 .Include(b => b.Patient);
             return View(await applicationDbContext.ToListAsync());
@@ -57,7 +63,20 @@ namespace BookingOZCoreWebApp.Controllers
 
             return View(booking);
         }
-
+        // GET: Bookings/PreviousBooking
+        public async Task<IActionResult> PreviousBooking()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var booking = _context.Booking.Where(b => (b.PatientId == userId | b.StaffId == userId) & b.IsFinalised);
+            if (User.IsInRole("Admin"))
+            {
+                booking = _context.Booking.Where(b => !b.IsFinalised);
+            }
+            var applicationDbContext = booking.Include(b => b.Location)
+                .Include(b => b.Staff)
+                .Include(b => b.Patient);
+            return View(await applicationDbContext.ToListAsync());
+        }
         // GET: Bookings/Create
         public IActionResult Create()
         {
@@ -73,7 +92,8 @@ namespace BookingOZCoreWebApp.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Date,StaffId,LocationId")] Booking booking)
-        {   
+        {
+            booking.IsFinalised = false;
             booking.PatientId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             booking.ServiceName = "X-Ray";
             booking.Location = await _context.Location.FirstOrDefaultAsync(m => m.Id == booking.LocationId);
@@ -200,7 +220,7 @@ namespace BookingOZCoreWebApp.Controllers
 
         private static async Task SendCreationBookingEmail(Booking booking)
         {
-            var apikey = "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";
+            var apikey = Environment.GetEnvironmentVariable("BookingOzSendGrid");
             var client = new SendGridClient(apikey);
 
             //Setup email

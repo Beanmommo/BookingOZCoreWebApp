@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/BookingOZCoreWebApp.styles.css" asp-append-version="true" />
+    <link href="c:\fit5032\bookingozcorewebapp\views\shared\homepage.css" rel="stylesheet" />
+    <link href="c:\fit5032\bookingozcorewebapp\wwwroot\lib\datatables\css\datatables.bootstrap.css" rel="stylesheet" />
+    <link href="c:\fit5032\bookingozcorewebapp\wwwroot\lib\datatables\css\datatables.bootstrap.min.css" rel="stylesheet" />
 </head>
 <body>
     <header>
@@ -45,10 +48,6 @@
                             </li>
                         }
                         
-                        
-                        
-
-                        
                     </ul>
                     <partial name="_LoginPartial" />
                 </div>
@@ -68,6 +67,11 @@
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/datatables/js/dataTables.bootstrap.js"></script>
+    <script src="~/lib/datatables/js/dataTables.bootstrap.min.js"></script>
+    <script src="~/lib/datatables/js/jquery.dataTables.js"></script>
+    <script src="~/lib/datatables/js/jquery.dataTables.min.js"></script>
+
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

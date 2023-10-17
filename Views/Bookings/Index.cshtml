@@ -4,11 +4,14 @@
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+<link href="c:\fit5032\bookingozcorewebapp\wwwroot\lib\datatables\css\datatables.bootstrap4.css" rel="stylesheet" />
+<link href="c:\fit5032\bookingozcorewebapp\wwwroot\lib\datatables\css\datatables.bootstrap4.min.css" rel="stylesheet" />
 
 <h1>Index</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create">Create New</a><br />
+    <a asp-action="PreviousBooking">Completed Booking List</a>
 </p>
 <table class="table">
     <thead>
@@ -73,3 +76,12 @@
 }
     </tbody>
 </table>
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            $('.table').DataTable();
+        });
+    </script>
+}
+
+

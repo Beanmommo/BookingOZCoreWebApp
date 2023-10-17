@@ -9,6 +9,7 @@ namespace BookingOZCoreWebApp.Models
         public int Id { get; set; }
         public string ServiceName { get; set; }
         public DateTime Date { get; set; }
+        public bool IsFinalised { get; set; }
         public string PatientId { get; set; }
         public string StaffId { get; set; }
         public int LocationId { get; set; }
