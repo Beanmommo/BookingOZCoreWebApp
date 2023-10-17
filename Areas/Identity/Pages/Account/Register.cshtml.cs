@@ -111,7 +111,8 @@ namespace BookingOZCoreWebApp.Areas.Identity.Pages.Account
         public async Task OnGetAsync(string returnUrl = null)
         {
             //pass the role using 
-            ViewData["roles"] = _roleManager.Roles.ToList();
+            var registerableRoles = _roleManager.Roles.Where(r => r.Name != "Admin");
+            ViewData["roles"] = registerableRoles.ToList();
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
