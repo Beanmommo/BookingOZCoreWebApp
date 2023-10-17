@@ -29,13 +29,16 @@ namespace BookingOZCoreWebApp.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<IdentityUser> _emailStore;
         private readonly IEmailSender _emailSender;
         private readonly ILogger<ExternalLoginModel> _logger;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
         public ExternalLoginModel(
             SignInManager<IdentityUser> signInManager,
             UserManager<IdentityUser> userManager,
             IUserStore<IdentityUser> userStore,
             ILogger<ExternalLoginModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            RoleManager<IdentityRole> roleManager
+            )
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -43,6 +46,7 @@ namespace BookingOZCoreWebApp.Areas.Identity.Pages.Account
             _emailStore = GetEmailStore();
             _logger = logger;
             _emailSender = emailSender;
+            _roleManager = roleManager;
         }
 
         /// <summary>
@@ -84,6 +88,9 @@ namespace BookingOZCoreWebApp.Areas.Identity.Pages.Account
             [Required]
             [EmailAddress]
             public string Email { get; set; }
+
+            [Display(Name = "Role")]
+            public string Role { get; set; }
         }
         
         public IActionResult OnGet() => RedirectToPage("./Login");
@@ -125,6 +132,8 @@ namespace BookingOZCoreWebApp.Areas.Identity.Pages.Account
             else
             {
                 // If the user does not have an account, then ask the user to create an account.
+                var registerableRoles = _roleManager.Roles.Where(r => r.Name != "Admin");
+                ViewData["roles"] = registerableRoles.ToList();
                 ReturnUrl = returnUrl;
                 ProviderDisplayName = info.ProviderDisplayName;
                 if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Email))

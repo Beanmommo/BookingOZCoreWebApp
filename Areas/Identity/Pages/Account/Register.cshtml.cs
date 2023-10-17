@@ -122,7 +122,7 @@ namespace BookingOZCoreWebApp.Areas.Identity.Pages.Account
             returnUrl ??= Url.Content("~/");
             //find role
             var role = _roleManager.FindByIdAsync(Input.Role).Result;
-            Console.WriteLine(role.ToString());
+            //Console.WriteLine(role.ToString());
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)

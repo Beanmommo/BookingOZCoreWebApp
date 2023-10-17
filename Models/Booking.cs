@@ -13,9 +13,11 @@ namespace BookingOZCoreWebApp.Models
         public string PatientId { get; set; }
         public string StaffId { get; set; }
         public int LocationId { get; set; }
+        
         public Location Location { get; set; }
         public IdentityUser Patient { get; set; }
         public IdentityUser Staff{ get; set; }
+        
         
     }
 }
