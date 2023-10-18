@@ -12,6 +12,7 @@ using SendGrid.Helpers.Mail;
 using SendGrid;
 using System.Text;
 using System.Net.Mail;
+using System.Security.Claims;
 
 namespace BookingOZCoreWebApp.Controllers
 {
@@ -29,7 +30,16 @@ namespace BookingOZCoreWebApp.Controllers
         // GET: Reports
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Report.Include(r => r.Booking);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userBooking = _context.Booking.Where(x => x.PatientId == userId).ToList();
+            List<int> userBookingIds = new List<int>();
+            foreach (Booking booking in userBooking)
+            {
+                userBookingIds.Add(booking.Id);
+            }
+            var userReports = _context.Report.Where(r => userBookingIds.Contains(r.BookingId));
+            var applicationDbContext = userReports.Include(r => r.Booking);
+            
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -77,7 +87,7 @@ namespace BookingOZCoreWebApp.Controllers
             ModelState.Clear();
             var myUniqueFileName = string.Format(@"{0}", Guid.NewGuid());
             report.Path = myUniqueFileName;
-            Console.WriteLine(report.BookingId.ToString());
+            //Console.WriteLine(report.BookingId.ToString());
             var booking = await _context.Booking.FirstOrDefaultAsync(m => m.Id == report.BookingId);
             booking.Location = await _context.Location.FirstOrDefaultAsync(m => m.Id == booking.LocationId);
             booking.Staff = await _context.Users.FirstOrDefaultAsync(m => m.Id == booking.StaffId);

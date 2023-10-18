@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BookingOZCoreWebApp.Data;
 using BookingOZCoreWebApp.Models;
+using BookingOZCoreWebApp.Migrations;
+using Rating = BookingOZCoreWebApp.Models.Rating;
 
 namespace BookingOZCoreWebApp.Controllers
 {
@@ -46,9 +48,9 @@ namespace BookingOZCoreWebApp.Controllers
         }
 
         // GET: Ratings/Create
-        public IActionResult Create()
+        public IActionResult Create(int BookingId)
         {
-            ViewData["BookingId"] = new SelectList(_context.Booking, "Id", "Id");
+            ViewData["BookingId"] = BookingId;
             return View();
         }
 
@@ -59,13 +61,28 @@ namespace BookingOZCoreWebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,BookingId,RatingValue,RatingDescription")] Rating rating)
         {
+            ModelState.Clear();
+            var booking = await _context.Booking.FirstOrDefaultAsync(m => m.Id == rating.BookingId);
+            booking.Location = await _context.Location.FirstOrDefaultAsync(m => m.Id == booking.LocationId);
+            booking.Staff = await _context.Users.FirstOrDefaultAsync(m => m.Id == booking.StaffId);
+            booking.Patient = await _context.Users.FirstOrDefaultAsync(m => m.Id == booking.PatientId);
+            rating.Booking = booking;
+            TryValidateModel(rating);
             if (ModelState.IsValid)
             {
                 _context.Add(rating);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["BookingId"] = new SelectList(_context.Booking, "Id", "Id", rating.BookingId);
+            else
+            {
+                var message = string.Join(" | ", ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage));
+                Console.Error.WriteLine(message);
+                Console.WriteLine("MODEL NOT VALID LIAO");
+            }
+            ViewData["BookingId"] = rating.BookingId;
             return View(rating);
         }
 

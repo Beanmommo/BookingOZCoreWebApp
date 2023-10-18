@@ -23,6 +23,12 @@
                 @Html.DisplayNameFor(model => model.Booking)
             </th>
             <th></th>
+            @if (User.IsInRole("Patient"))
+            {
+                <th>
+                    --
+                </th>
+            }
         </tr>
     </thead>
     <tbody>
@@ -42,6 +48,13 @@
                 <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
                 <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
             </td>
+                @if (User.IsInRole("Patient"))
+                {
+                    <td>
+                        <a asp-controller="Ratings" asp-action="Create" asp-route-bookingid="@item.BookingId">Give Rating</a>
+                    </td>
+                }
+
         </tr>
 }
     </tbody>
