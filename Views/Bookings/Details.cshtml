@@ -42,6 +42,41 @@
             @Html.DisplayFor(model => model.Location.Name)
         </dd>
     </dl>
+    @if (Model.IsFinalised)
+    {
+        <h4>Attatched Report</h4>
+        <hr />
+        <dt class="col-sm-2">
+            Report File Name
+        </dt>
+        <dd class="col-sm-10">
+            @ViewBag.ReportFile
+        </dd>
+
+        <dt class="col-sm-2">
+            Staff Comments
+        </dt>
+        <dd class="col-sm-10">
+            @ViewBag.ReportComments
+        </dd>
+
+        <h4>User Rating</h4>
+        <hr />
+        <dt class="col-sm-2">
+            Rating Grade
+        </dt>
+        <dd class="col-sm-10">
+            @ViewBag.RatingGrade /10
+        </dd>
+        <dt class="col-sm-2">
+            User Review
+        </dt>
+        <dd class="col-sm-10">
+            @ViewBag.RatingComments
+        </dd>
+
+    }   
+    
 </div>
 <div>
     <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |

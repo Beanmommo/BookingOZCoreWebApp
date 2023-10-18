@@ -61,6 +61,16 @@ namespace BookingOZCoreWebApp.Controllers
                 return NotFound();
             }
 
+            if (booking.IsFinalised)
+            {
+                var report = await _context.Report.FirstOrDefaultAsync(r => r.BookingId == booking.Id);
+                var rating = await _context.Rating.FirstOrDefaultAsync(r => r.BookingId == booking.Id);
+                ViewData["ReportFile"] = report.Path;
+                ViewData["ReportComments"] = report.Description;
+                ViewData["RatingGrade"] = rating.RatingValue.ToString();
+                ViewData["RatingComments"] = rating.RatingDescription;
+            }
+
             return View(booking);
         }
         // GET: Bookings/PreviousBooking
