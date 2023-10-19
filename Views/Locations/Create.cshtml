@@ -4,11 +4,13 @@
     ViewData["Title"] = "Create Location";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <h1>Create</h1>
 
 <h4>Location</h4>
 <hr />
+<div id="map" style="width:400px; height:300px;"></div>
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create">
@@ -43,6 +45,23 @@
 <div>
     <a asp-action="Index">Back to List</a>
 </div>
+<script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoibGVvbmFyZG9wcmFzZXR5bzUiLCJhIjoiY2xsNTRvb2N4MGFtbzNlcGJ4cnk3ZTBqYSJ9.UK3uU3QgfCZ3hyc6pcVHJw';
+    const map = new mapboxgl.Map({
+        container: 'map', // container ID
+        // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
+        style: 'mapbox://styles/mapbox/streets-v10', // style URL
+        center: [144.9609, -37.8437], // starting position [lng, lat]
+        zoom: 11 // starting zoom
+    });
+    map.addControl(
+        new MapboxGeocoder({
+            accessToken: mapboxgl.accessToken,
+            mapboxgl: mapboxgl
+        })
+    );
+
+</script>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
