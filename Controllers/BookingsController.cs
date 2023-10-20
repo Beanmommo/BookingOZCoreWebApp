@@ -65,10 +65,23 @@ namespace BookingOZCoreWebApp.Controllers
             {
                 var report = await _context.Report.FirstOrDefaultAsync(r => r.BookingId == booking.Id);
                 var rating = await _context.Rating.FirstOrDefaultAsync(r => r.BookingId == booking.Id);
+                
                 ViewData["ReportFile"] = report.Path;
                 ViewData["ReportComments"] = report.Description;
-                ViewData["RatingGrade"] = rating.RatingValue.ToString();
-                ViewData["RatingComments"] = rating.RatingDescription;
+                ViewData["RatingGrade"] = rating?.RatingValue.ToString();
+                ViewData["RatingComments"] = rating?.RatingDescription;
+                if (ViewData["RatingGrade"] == null)
+                {
+                    ViewData["RatingGrade"] = "Patient has not provide any rating";
+                }
+                else
+                {
+                    ViewData["RatingGrade"] += " /10";
+                }
+                if (ViewData["RatingComments"] == null)
+                {
+                    ViewData["RatingComments"] = "Patient has not provide any comments";
+                }
             }
 
             return View(booking);

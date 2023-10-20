@@ -66,7 +66,7 @@
             Rating Grade
         </dt>
         <dd class="col-sm-10">
-            @ViewBag.RatingGrade /10
+            @ViewBag.RatingGrade 
         </dd>
         <dt class="col-sm-2">
             User Review
@@ -80,5 +80,13 @@
 </div>
 <div>
     <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    @if (@Model.IsFinalised)
+    {
+        <a asp-action="PreviousBooking">Back to List</a>
+    }
+    else
+    {
+        <a asp-action="Index">Back to List</a>
+    }
+
 </div>

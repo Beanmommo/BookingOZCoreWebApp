@@ -121,7 +121,7 @@ namespace BookingOZCoreWebApp.Controllers
                 _context.Add(report);
                 _context.Update(booking);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("PreviousBooking", "Bookings", new { area = ""});
             }
             else
             {
