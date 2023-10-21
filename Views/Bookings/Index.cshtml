@@ -10,7 +10,11 @@
 <h1>Ongoing Bookings</h1>
 
 <p>
-    <a asp-action="Create">Create New</a><br />
+    @if (User.IsInRole("Admin") | User.IsInRole("Patient"))
+    {
+        <a asp-action="Create">Book a new appointment</a>
+    }
+    <br />
     <a asp-action="PreviousBooking">Completed Booking List</a>
 </p>
 <table class="table">

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace BookingOZCoreWebApp.Controllers
 {
-    [Authorize]
+    
     public class LocationsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -49,6 +49,8 @@ namespace BookingOZCoreWebApp.Controllers
         }
 
         // GET: Locations/Create
+        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Staff")]
         public IActionResult Create()
         {
             return View();
