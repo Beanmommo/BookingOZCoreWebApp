@@ -9,6 +9,11 @@
 
 <p>
     <a asp-action="Index">Go Back</a><br />
+    @if (User.IsInRole("Patient"))
+    {
+        <a asp-controller="Reports" asp-action="Index" asp-area="">View Released Reports</a>
+    }
+    
 
 </p>
 <table class="table">

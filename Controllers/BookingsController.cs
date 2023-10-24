@@ -243,7 +243,7 @@ namespace BookingOZCoreWebApp.Controllers
 
         private static async Task SendCreationBookingEmail(Booking booking)
         {
-            var apikey = Environment.GetEnvironmentVariable("BookingOzSendGrid");
+            var apikey = "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";
             var client = new SendGridClient(apikey);
 
             //Setup email

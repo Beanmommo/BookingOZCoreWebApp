@@ -236,7 +236,7 @@ namespace BookingOZCoreWebApp.Controllers
 
         private static async Task SendBookingReportEmail(Booking booking, Report report, string reportFilePath)
         {
-            var apikey = Environment.GetEnvironmentVariable("BookingOzSendGrid");
+            var apikey = "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";
             var client = new SendGridClient(apikey);
 
             //Setup email
